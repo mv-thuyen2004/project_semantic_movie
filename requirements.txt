@@ -1,0 +1,9 @@
+numpy
+pandas
+scikit-learn
+sentence-transformers
+torch
+joblib
+scipy
+streamlit
+charset-normalizer

@@ -1,0 +1,6 @@
+movie_id,title,genre,description,year,poster
+1,Inception,Sci-Fi,"A thief who steals corporate secrets through dream-sharing technology.",2010,url1
+2,Interstellar,Sci-Fi,"A team travels through a wormhole in search of a new home for humanity.",2014,url2
+3,Titanic,Romance,"A seventeen-year-old aristocrat falls in love with a kind but poor artist.",1997,url3
+4,The Matrix,Sci-Fi,"A hacker discovers the world is a simulated reality.",1999,url4
+5,Action Hero,Action,"A retired hero is forced back into action.",2019,url5
