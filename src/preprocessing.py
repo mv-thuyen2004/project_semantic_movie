@@ -4,7 +4,7 @@ import unicodedata
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 # =======================================================
-# ⚙️ 1. HÀM CHUẨN HOÁ TEXT CƠ BẢN (Core Normalization)
+#  1. HÀM CHUẨN HOÁ TEXT CƠ BẢN (Core Normalization)
 # =======================================================
 def normalize_text(text: str) -> str:
     """
@@ -32,7 +32,7 @@ def normalize_text(text: str) -> str:
 
 
 # =======================================================
-# ⚙️ 2. HÀM LOẠI STOPWORDS (Dành riêng cho TF-IDF)
+# 2. HÀM LOẠI STOPWORDS (Dành riêng cho TF-IDF)
 # =======================================================
 def remove_stopwords(text: str) -> str:
     """
@@ -48,59 +48,87 @@ def remove_stopwords(text: str) -> str:
 
 
 # =======================================================
-# ⚙️ 3. HÀM HỖ TRỢ: GỘP CÁC TRƯỜNG DỮ LIỆU AN TOÀN
+#  3. HÀM HỖ TRỢ: GỘP CÁC TRƯỜNG DỮ LIỆU AN TOÀN (CÓ TRỌNG SỐ)
 # =======================================================
-def _build_text_core(row, field_list):
+def _build_text_core(row, weighted_fields: list) -> str:
     """
     Gộp các trường dữ liệu được chỉ định thành một chuỗi duy nhất,
-    ngăn cách bằng dấu chấm để duy trì tính ngữ nghĩa.
+    áp dụng trọng số bằng cách nhân bản nội dung.
+
+    weighted_fields: List các tuple (field_name, weight_factor).
+    Ví dụ: [('genre', 4), ('director', 3)]
     """
     parts = []
     
-    # Lặp qua danh sách các cột cần gộp (Ví dụ: ['title', 'genre', 'review'])
-    for field in field_list:
-        # Sử dụng .get() an toàn và đảm bảo giá trị là chuỗi
+    # Lặp qua danh sách các tuple (tên trường, trọng số)
+    for field, weight in weighted_fields:
         value = row.get(field)
+        
         if pd.notna(value) and str(value).strip():
-            parts.append(str(value))
-    
+            content = str(value)
+            
+            # ÁP DỤNG TRỌNG SỐ: Nhân bản chuỗi
+            weighted_content = (content + ' ') * weight
+            
+            parts.append(weighted_content.strip())
+            
+    # Nối các phần lại với nhau bằng dấu chấm hoặc khoảng trắng
     return ". ".join(parts)
 
 
 # =======================================================
-# 🔹 4. TẠO TEXT ĐẦU VÀO CHO TF-IDF (similarity_text)
+# 4. TẠO TEXT ĐẦU VÀO CHO TF-IDF (similarity_text)
 # =======================================================
 def build_similarity_text(row):
     """
-    Tạo text cho TF-IDF: Gộp các trường, chuẩn hóa, và loại bỏ stopwords.
-    Text được làm sạch giúp TF-IDF tập trung vào từ khóa.
+    Tạo text cho TF-IDF: Gộp các trường, chuẩn hóa, và loại bỏ stopwords,
+    ÁP DỤNG TRỌNG SỐ cho các trường quan trọng.
     """
-    # Gộp tất cả các trường quan trọng cho nội dung và ngữ cảnh
-    field_list = ['title', 'genre', 'description', 'review', 'director', 'cast']
-    
-    joined_text = _build_text_core(row, field_list)
-    
-    # 1. Chuẩn hóa (Normalize)
+    # 1. Định nghĩa Trọng số cho từng trường (W = số lần lặp lại)
+    WEIGHTED_FIELDS = [
+        ('title', 2),
+        ('genre', 4),
+        ('director', 3),
+        ('cast', 3),
+        ('description', 3),
+        ('review', 1),
+    ] 
+
+    # 2. Gộp văn bản và áp dụng nhân bản trọng số
+    joined_text = _build_text_core(row, WEIGHTED_FIELDS)
+
+    # 3. Chuẩn hóa (Normalize)
     cleaned = normalize_text(joined_text)
-    
-    # 2. Loại bỏ Stopwords
+
+    # 4. Loại bỏ Stopwords
     cleaned = remove_stopwords(cleaned)
-    
+
     return cleaned
-
-
 # =======================================================
-# 🔹 5. TẠO TEXT ĐẦU VÀO CHO SBERT (full_text)
+# 5. TẠO TEXT ĐẦU VÀO CHO SBERT (full_text)
 # =======================================================
 def build_full_text(row):
     """
     Tạo text cho SBERT: Gộp tất cả các trường, chỉ chuẩn hóa (giữ lại stopwords).
     SBERT cần ngữ cảnh đầy đủ.
     """
-    # Gộp tất cả các trường (Giữ nguyên field_list như trên)
-    field_list = ['title', 'genre', 'description', 'review', 'director', 'cast']
+    # # Gộp tất cả các trường (Giữ nguyên field_list như trên)
+    # field_list = ['title', 'genre', 'description', 'review', 'director', 'cast']
     
-    joined_text = _build_text_core(row, field_list)
+    # joined_text = _build_text_core(row, field_list)
+
+    # 1. Định nghĩa các trường với TRỌNG SỐ W=1
+    SBERT_FIELDS = [
+        ('title', 1),
+        ('genre', 1),
+        ('description', 1),
+        ('review', 1),
+        ('director', 1),
+        ('cast', 1)
+    ]
+    
+    # 2. Gộp văn bản và truyền vào hàm _build_text_core
+    joined_text = _build_text_core(row, SBERT_FIELDS) 
     
     # Chỉ Chuẩn hóa (Normalize)
     cleaned = normalize_text(joined_text)
@@ -109,7 +137,7 @@ def build_full_text(row):
 
 
 # =======================================================
-# 🔹 6. TIỀN XỬ LÝ CÂU TRUY VẤN (Dùng cho Semantic Search)
+# 6. TIỀN XỬ LÝ CÂU TRUY VẤN (Dùng cho Semantic Search)
 # =======================================================
 def preprocess_query(query: str, model_type: str = 'sbert') -> str:
     """
@@ -130,7 +158,7 @@ def preprocess_query(query: str, model_type: str = 'sbert') -> str:
 
 
 # =======================================================
-# 🔹 7. HÀM CHÍNH: Load cleaned dataset + tạo các cột xử lý
+# 7. HÀM CHÍNH: Load cleaned dataset + tạo các cột xử lý
 # =======================================================
 def load_and_process_data(path: str = "../data/clean_movies.csv") -> pd.DataFrame:
     """

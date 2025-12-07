@@ -15,9 +15,9 @@ from src.recommender_tfidf import load_tfidf_models
 
 
 # 🔧 CONFIG CHUNG
-DATA_PATH = 'data/clean_movies.csv'
-TFIDF_MODEL_PATH = 'models/tfidf_vectorizer.pkl'
-TFIDF_MATRIX_PATH = 'models/tfidf_matrix.npy' # Hoặc .joblib
+DATA_PATH = '../data/clean_movies.csv'
+TFIDF_MODEL_PATH = '../models/tfidf_vectorizer.pkl'
+TFIDF_MATRIX_PATH = '../models/tfidf_matrix.npy' # Hoặc .joblib
 # ❌ LOẠI BỎ CONFIG SBERT
 
 
