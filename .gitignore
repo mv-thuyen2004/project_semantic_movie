@@ -1,1 +1,87 @@
-models/sbert_cosine_matrix.npy
+# 🧠 Large Model Files (Too large for Git)
+models/**/*.pt
+models/**/*.npy
+models/**/*.pkl
+models/**/*.npz
+models/sbert_model/
+models/tfidf_vectorizer.pkl
+models/tfidf_matrix.npy
+models/sbert_embeddings.pt
+
+# 📊 Large Data Files
+data/**/*.csv
+!data/README.md
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 📔 Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+notebook/.ipynb_checkpoints/
+
+# 📚 Virtual Environments
+venv/
+ENV/
+env/
+.venv
+
+# 🔧 IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# 📦 Dependencies
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 🧪 Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 🔐 Sensitive Files
+.env
+.env.local
+*.secret
+credentials.json
+
+# 📁 OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# 🧠 Cache Files
+*.cache
+.streamlit/
+
+# 📊 Streamlit
+.streamlit/secrets.toml
+
+# 🔍 Miscellaneous
+.git
+.gitignore

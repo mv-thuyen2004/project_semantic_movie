@@ -230,8 +230,7 @@ def semantic_search_section():
         else:
             st.warning("🤷 Không tìm thấy kết quả nào phù hợp")
         
-        # Save to history (Nếu cần)
-        # ... (phần code lưu lịch sử giữ nguyên)
+
 
 
 # 6. CHỨC NĂNG MOVIE RECOMMENDATION (Điều chỉnh để SỬ DỤNG TF-IDF)

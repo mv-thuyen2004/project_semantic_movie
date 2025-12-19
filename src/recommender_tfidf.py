@@ -54,6 +54,8 @@ class TFIDFRecommender:
                     'description': self.df.iloc[idx].get('description', 'N/A'),
                     'year': self.df.iloc[idx]['year'],    # <--- THÊM NĂM
                     'poster': self.df.iloc[idx]['poster'], # <--- THÊM POSTER
+                    'rating': self.df.iloc[idx].get('rating', 'N/A'),
+                    'review': self.df.iloc[idx].get('review', ''),
                     'similarity_score': float(similarity_score),
                     'original_index': int(idx)
                 })
@@ -62,8 +64,7 @@ class TFIDFRecommender:
         
     
     def get_similar_movies(self, movie_title, top_k=10, exclude_self=True):
-    # ... (Phần kiểm tra if movie_title not in self.movie_indices_map giữ nguyên)
-    
+  
     # 1. Tra cứu Index (LƯU KẾT QUẢ CỦA TRA CỨU)
         movie_idx_raw = self.movie_indices_map[movie_title]
     
@@ -102,59 +103,18 @@ class TFIDFRecommender:
                 'title': self.df.iloc[idx]['title'],
                 'genre': self.df.iloc[idx]['genre'],
                 'description': self.df.iloc[idx].get('description', 'N/A'),
-                'year': self.df.iloc[idx]['year'],    # <--- THÊM NĂM
-                'poster': self.df.iloc[idx]['poster'], # <--- THÊM POSTER URL
+                'year': self.df.iloc[idx]['year'],   
+                'poster': self.df.iloc[idx]['poster'], 
+                'rating': self.df.iloc[idx].get('rating', 'N/A'),
+                'review': self.df.iloc[idx].get('review', ''),
                 'similarity_score': float(similarities[idx]),
                 'original_index': int(idx)
             })
         
         return similar_movies
-
-
-    def get_similar_movies_by_index(self, movie_idx, top_k=10, exclude_self=True):
-        """
-        Gợi ý phim tương tự dựa trên index của phim.
-        (ĐÃ FIX LỖI ÉP KIỂU SCALAR)
-        """
-        # Nếu movie_idx đến từ bên ngoài, ta vẫn cần đảm bảo nó là int
-        movie_idx = int(movie_idx) 
-        
-        if movie_idx >= len(self.df) or movie_idx < 0:
-            return []
-            
-        # ✅ Lấy vector của phim gốc và tính similarity 1×N DYNAMIC
-        movie_vector = self.tfidf_matrix[movie_idx]
-        similarities = skpair.cosine_similarity(movie_vector, self.tfidf_matrix).flatten()
-        
-        sorted_indices = np.argsort(similarities)[::-1]
-        
-        if exclude_self:
-            # FIX LỖI: Đảm bảo phép so sánh NumPy an toàn
-            sorted_indices = sorted_indices[sorted_indices != movie_idx]
-        
-        top_indices = sorted_indices[:top_k]
-        
-        # Tạo kết quả
-        similar_movies = []
-        for idx in top_indices:
-            similar_movies.append({
-                'title': self.df.iloc[idx]['title'],
-                'genre': self.df.iloc[idx]['genre'],
-                'description': self.df.iloc[idx].get('description', 'N/A'),
-                'year': self.df.iloc[idx]['year'],    # <--- THÊM NĂM
-                'poster': self.df.iloc[idx]['poster'], # <--- THÊM POSTER URL
-                'similarity_score': float(similarities[idx]),
-                'original_index': int(idx)
-            })
-            
-        return similar_movies
-    
-    # [Các hàm khác như hybrid_search, get_popular_movies_by_genre sẽ được cập nhật tương tự]
-
 
 # Hàm tiện ích để load model (Dùng trong app.py)
 def load_tfidf_models(tfidf_path, matrix_path, data_path):
-    # ... (Logic load giữ nguyên) ...
     try:
         tfidf_model = joblib.load(tfidf_path)
         

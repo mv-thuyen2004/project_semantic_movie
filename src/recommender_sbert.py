@@ -99,6 +99,8 @@ class SBERTRecommender:
                     'description': self.df.iloc[idx].get('description', ''),
                     'year': self.df.iloc[idx].get('year', 'N/A'),
                     'poster': self.df.iloc[idx].get('poster', ''),
+                    'rating': self.df.iloc[idx].get('rating', 'N/A'),
+                    'review': self.df.iloc[idx].get('review', ''),
                     'similarity_score': float(similarity_score),
                     'original_index': int(idx)
                 })
@@ -146,48 +148,13 @@ class SBERTRecommender:
                 'description': self.df.iloc[idx].get('description', ''),
                 'year': self.df.iloc[idx].get('year', 'N/A'),
                 'poster': self.df.iloc[idx].get('poster', ''),
+                'rating': self.df.iloc[idx].get('rating', 'N/A'),
+                'review': self.df.iloc[idx].get('review', ''),
                 'similarity_score': float(similarities[idx]),
                 'original_index': int(idx)
             })
         
         return similar_movies
-    
-    def hybrid_search(self, query, top_k=10):
-        """
-        Tìm kiếm lai giữa semantic search và content-based recommendation
-        
-        Args:
-            query (str): Câu truy vấn
-            top_k (int): Số kết quả trả về
-            
-        Returns:
-            list: Danh sách kết quả kết hợp
-        """
-        # Tìm kiếm semantic với SBERT
-        semantic_results = self.search_movies(query, top_k=top_k//2)
-        
-        # Nếu có kết quả, lấy phim đầu tiên và gợi ý phim tương tự
-        if semantic_results:
-            best_match_idx = semantic_results[0]['original_index']
-            similar_movies = self.get_similar_movies_by_index(best_match_idx, top_k=top_k//2)
-            
-            # Kết hợp kết quả (loại bỏ trùng lặp)
-            combined_results = semantic_results + similar_movies
-            
-            # Loại bỏ trùng lặp dựa trên title
-            seen_titles = set()
-            unique_results = []
-            
-            for movie in combined_results:
-                if movie['title'] not in seen_titles:
-                    seen_titles.add(movie['title'])
-                    unique_results.append(movie)
-            
-            return unique_results[:top_k]
-        else:
-            return self.search_movies(query, top_k=top_k)
-
-
 # Hàm tiện ích để load model - DÙNG TRONG APP.PY
 def load_sbert_models(model_path, embeddings_path, data_path):
     """
@@ -242,48 +209,6 @@ def load_sbert_models(model_path, embeddings_path, data_path):
         
     except Exception as e_final:
         print(f"❌ Lỗi khi load embeddings/data: {e_final}")
-        return None
-
-
-def load_sbert_models_from_huggingface(model_name="sentence-transformers/all-MiniLM-L6-v2", embeddings_path=None, data_path=None):
-    """
-    Load SBERT model từ HuggingFace và embeddings từ file
-    
-    Args:
-        model_name (str): Tên model trên HuggingFace
-        embeddings_path (str): Đường dẫn đến embeddings
-        data_path (str): Đường dẫn đến dữ liệu phim
-        
-    Returns:
-        SBERTRecommender: Instance của recommender
-    """
-    try:
-        # Xác định device
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"🔄 Using device: {device}")
-        
-        # Load SBERT model từ HuggingFace
-        print(f"🔄 Đang load SBERT model: {model_name}")
-        sbert_model = SentenceTransformer(model_name, device=device)
-        
-        # Load embeddings
-        if embeddings_path and os.path.exists(embeddings_path):
-            print("🔄 Đang load embeddings...")
-            if embeddings_path.endswith('.pt'):
-                sbert_embeddings = torch.load(embeddings_path, map_location=device)
-            else:
-                sbert_embeddings = np.load(embeddings_path)
-        else:
-            raise FileNotFoundError(f"Embeddings file không tồn tại: {embeddings_path}")
-        
-        # Load data
-        df = pd.read_csv(data_path)
-        
-        print("✅ Đã load SBERT models thành công")
-        return SBERTRecommender(sbert_model, sbert_embeddings, df)
-        
-    except Exception as e:
-        print(f"❌ Lỗi khi load SBERT models: {e}")
         return None
 
 

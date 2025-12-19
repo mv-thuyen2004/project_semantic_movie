@@ -221,7 +221,7 @@ def movie_recommendation_section():
     with col1:
         selected_movie = st.selectbox(
             "🎬 Chọn một phim:",
-            movie_titles[:200],
+            movie_titles,
             key="movie_select"
         )
         
